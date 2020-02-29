@@ -10,7 +10,9 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class MapController extends TiledMap implements InputProcessor {
     private final int xSize;
@@ -43,12 +45,15 @@ public class MapController extends TiledMap implements InputProcessor {
         baseLayer = new TiledMapTileLayer(xSize, ySize, 32, 32);
         objectLayer = new TiledMapTileLayer(xSize, ySize, 32, 32);
 
-        Map<Position, Boolean> walls = MapGenerator.generate(xGrid, yGrid);
+        Set<Position> entrances = new HashSet<>();
+        entrances.add(new Position(0, 4));
+
+        Map<Position, Boolean> walls = MapGenerator.generate(xGrid, yGrid, entrances);
 
         for (int row = 0; row < xGrid; row++) {
             for (int col = 0; col < yGrid; col++) {
                 baseLayer.setCell(col, row, grass);
-                if (walls.getOrDefault(new Position(row, col), false)) {
+                if (walls.getOrDefault(new Position(col, row), false)) {
                     objectLayer.setCell(col, row, bush);
                 }
             }
