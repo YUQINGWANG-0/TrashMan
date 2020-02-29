@@ -7,6 +7,9 @@ import com.trashman.game.Program;
 public class DesktopLauncher {
 	public static void main (String[] arg) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
+		config.title = "TrashMan";
+		config.width = 640;
+		config.height = 640;
 		new LwjglApplication(new Program(), config);
 	}
 }
