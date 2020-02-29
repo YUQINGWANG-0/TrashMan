@@ -11,6 +11,7 @@ public class MapGenerator {
         }
 
         Map<Position, Boolean> walls = new HashMap<>();
+        //boolean[][] walls = new boolean[yGrid][xGrid];
 
         //fill with grass
         for (int row = 0; row < yGrid; row++) {
@@ -50,14 +51,17 @@ public class MapGenerator {
 
         //run the cell automaton
         for (int i = 0; i < 50; i++) {
-            for (int row = 2; row < yGrid - 2; row++) {
-                for (int col = 2; col < xGrid - 2; col++) {
+            for (int row = 1; row < yGrid - 1; row++) {
+                for (int col = 1; col < xGrid - 1; col++) {
                     Position pos = new Position(col, row);
-                    int neigh = getNeighbours(walls, pos, xGrid, yGrid);
-                    if (neigh < 3) {
-                        walls.put(pos, false);
-                    } else if (neigh > 5) {
+                    int neighbours = getNeighbours(walls, pos, xGrid, yGrid);
+                    int freeSpaces = 8 - neighbours;
+
+                    if (freeSpaces < 3) {
                         walls.put(pos, true);
+                    }
+                    if (freeSpaces > 5) {
+                        walls.put(pos, false);
                     }
                 }
             }
@@ -95,7 +99,7 @@ public class MapGenerator {
         int count = walls.get(pos) ? -1 : 0;
         for (int y = pos.getY() - 1; y <= pos.getY() + 1; y++) {
             for (int x = pos.getX() - 1; x <= pos.getX() + 1; x++) {
-                if (walls.get(new Position(x, y))) {
+                if (walls.getOrDefault(new Position(x, y), false)) {
                     count++;
                 }
             }
