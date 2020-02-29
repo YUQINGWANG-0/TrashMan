@@ -24,6 +24,7 @@ public class MapController extends TiledMap implements InputProcessor {
     private Player player;
     private Position playerposition;
     private Trash banana;
+    private Bin bin;
 
     private TiledMapTileLayer baseLayer;
     private TiledMapTileLayer objectLayer;
@@ -33,6 +34,7 @@ public class MapController extends TiledMap implements InputProcessor {
     private TiledMapTileLayer.Cell bush = new TiledMapTileLayer.Cell();
     private TiledMapTileLayer.Cell players = new TiledMapTileLayer.Cell();
     private TiledMapTileLayer.Cell bananas = new TiledMapTileLayer.Cell();
+    private TiledMapTileLayer.Cell bins = new TiledMapTileLayer.Cell();
 
     public MapController(int xGrid, int yGrid) {
         super();
@@ -46,12 +48,15 @@ public class MapController extends TiledMap implements InputProcessor {
         this.player = new Player(playerposition);
         //initialize trash
         this.banana = new Trash(new Position(8,6));
+        //initialize bin
+        this.bin = new Bin(new Position(10,11));
 
 
         grass.setTile(new StaticTiledMapTile(new TextureRegion(manager.get("sprites/grass.png", Texture.class))));
         bush.setTile(new StaticTiledMapTile(new TextureRegion(manager.get("sprites/bush.png", Texture.class))));
         players.setTile(new StaticTiledMapTile(new TextureRegion(manager.get("sprites/goodman_L.png", Texture.class))));
         bananas.setTile(new StaticTiledMapTile(new TextureRegion(manager.get("sprites/banana.png", Texture.class))));
+        bins.setTile(new StaticTiledMapTile(new TextureRegion(manager.get("sprites/bin_red.png", Texture.class))));
 
         createMap();
     }
@@ -85,64 +90,76 @@ public class MapController extends TiledMap implements InputProcessor {
         // add the trash
         objectLayer.setCell(8, 6, bananas);
 
+        // add the bin
+        objectLayer.setCell(10,11,bins);
+
     }
 
 
 
     @Override
     public boolean keyDown(int keycode) {
-        if (keycode == Input.Keys.DPAD_RIGHT){
-            if (objectLayer.getCell(player.getposition().getX()+1,player.getposition().getY()) == null){
-                objectLayer.setCell(player.getposition().getX(),player.getposition().getY(),null);
+        if (keycode == Input.Keys.DPAD_RIGHT) {
+            if (objectLayer.getCell(player.getposition().getX() + 1, player.getposition().getY()) == null) {
+                objectLayer.setCell(player.getposition().getX(), player.getposition().getY(), null);
                 player.moveright();
-            }
-            else{
+            } else {
                 return false;
             }
         }
-        if (keycode == Input.Keys.DPAD_LEFT){
-            if (objectLayer.getCell(player.getposition().getX()-1,player.getposition().getY()) == null){
-                objectLayer.setCell(player.getposition().getX(),player.getposition().getY(),null);
+        if (keycode == Input.Keys.DPAD_LEFT) {
+            if (objectLayer.getCell(player.getposition().getX() - 1, player.getposition().getY()) == null) {
+                objectLayer.setCell(player.getposition().getX(), player.getposition().getY(), null);
                 player.moveleft();
-            }
-            else{
+            } else {
                 return false;
             }
         }
-        if (keycode == Input.Keys.DPAD_UP){
-            if (objectLayer.getCell(player.getposition().getX(),player.getposition().getY()+1) == null){
-                objectLayer.setCell(player.getposition().getX(),player.getposition().getY(),null);
+        if (keycode == Input.Keys.DPAD_UP) {
+            if (objectLayer.getCell(player.getposition().getX(), player.getposition().getY() + 1) == null) {
+                objectLayer.setCell(player.getposition().getX(), player.getposition().getY(), null);
                 player.moveup();
-            }
-            else{
+            } else {
                 return false;
             }
         }
-        if (keycode == Input.Keys.DPAD_DOWN){
-            if (objectLayer.getCell(player.getposition().getX(),player.getposition().getY()-1) == null){
-                objectLayer.setCell(player.getposition().getX(),player.getposition().getY(),null);
+        if (keycode == Input.Keys.DPAD_DOWN) {
+            if (objectLayer.getCell(player.getposition().getX(), player.getposition().getY() - 1) == null) {
+                objectLayer.setCell(player.getposition().getX(), player.getposition().getY(), null);
                 player.movedown();
-            }
-            else{
+            } else {
                 return false;
             }
         }
         objectLayer.setCell(player.getposition().getX(), player.getposition().getY(), players);
 
-        if (keycode == Input.Keys.SPACE){
-            if (objectLayer.getCell(player.getposition().getX(),player.getposition().getY()-1) == bananas ||
-                    objectLayer.getCell(player.getposition().getX(),player.getposition().getY()+1) == bananas||
-                    objectLayer.getCell(player.getposition().getX()+1,player.getposition().getY()) == bananas||
-                    objectLayer.getCell(player.getposition().getX()-1,player.getposition().getY()) == bananas){
-                objectLayer.setCell(banana.getPosition().getX(),banana.getPosition().getY(),null);
+        if (keycode == Input.Keys.SPACE) {
+            if ((objectLayer.getCell(player.getposition().getX(), player.getposition().getY() - 1) == bananas ||
+                    objectLayer.getCell(player.getposition().getX(), player.getposition().getY() + 1) == bananas ||
+                    objectLayer.getCell(player.getposition().getX() + 1, player.getposition().getY()) == bananas ||
+                    objectLayer.getCell(player.getposition().getX() - 1, player.getposition().getY()) == bananas) &&
+                    player.checkbag()) {
+                objectLayer.setCell(banana.getPosition().getX(), banana.getPosition().getY(), null);
                 player.pickup(banana);
-            }
-            else{
+            } else {
                 return false;
             }
         }
-        return false;
-    }
+        if (keycode == Input.Keys.ENTER) {
+            if ((objectLayer.getCell(player.getposition().getX(), player.getposition().getY() - 1) == bins ||
+                    objectLayer.getCell(player.getposition().getX(), player.getposition().getY() + 1) == bins ||
+                    objectLayer.getCell(player.getposition().getX() + 1, player.getposition().getY()) == bins ||
+                    objectLayer.getCell(player.getposition().getX() - 1, player.getposition().getY()) == bins) &&
+                    !player.checkbag()) {
+                objectLayer.setCell(bin.getPosition().getX(), bin.getPosition().getY(), null);
+                player.putdown();
+            } else {
+                return false;
+            }
+        }
+            return false;
+        }
+
 
     @Override
     public boolean keyUp(int keycode) {

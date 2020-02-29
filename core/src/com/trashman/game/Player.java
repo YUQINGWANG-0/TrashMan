@@ -15,7 +15,17 @@ public class Player {
 
     }
 
+    public boolean checkbag(){
+        if (trash == null){
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
     public void putdown(){
+        trash = null;
 
     }
 
