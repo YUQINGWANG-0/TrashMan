@@ -53,10 +53,10 @@ public class MapGenerator {
             for (int row = 2; row < yGrid - 2; row++) {
                 for (int col = 2; col < xGrid - 2; col++) {
                     Position pos = new Position(col, row);
-                    int count = getNeighbours(walls, pos, xGrid, yGrid);
-                    if (count < 3) {
+                    int neigh = getNeighbours(walls, pos, xGrid, yGrid);
+                    if (neigh < 3) {
                         walls.put(pos, false);
-                    } else if (count > 5) {
+                    } else if (neigh > 5) {
                         walls.put(pos, true);
                     }
                 }

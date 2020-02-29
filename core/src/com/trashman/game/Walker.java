@@ -1,9 +1,6 @@
 package com.trashman.game;
 
-import com.badlogic.gdx.scenes.scene2d.ui.List;
-
 import java.util.Random;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
