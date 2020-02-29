@@ -46,7 +46,10 @@ public class MapController extends TiledMap implements InputProcessor {
         objectLayer = new TiledMapTileLayer(xSize, ySize, 32, 32);
 
         Set<Position> entrances = new HashSet<>();
-        entrances.add(new Position(0, 4));
+        entrances.add(new Position(0, 2));
+        entrances.add(new Position(17, 0));
+        entrances.add(new Position(xGrid - 1, 11));
+        entrances.add(new Position(5, yGrid - 1));
 
         Map<Position, Boolean> walls = MapGenerator.generate(xGrid, yGrid, entrances);
 

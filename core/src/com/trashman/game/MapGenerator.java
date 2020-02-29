@@ -1,9 +1,6 @@
 package com.trashman.game;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 public class MapGenerator {
 
@@ -15,12 +12,14 @@ public class MapGenerator {
 
         Map<Position, Boolean> walls = new HashMap<>();
 
+        //fill with grass
         for (int row = 0; row < yGrid; row++) {
             for (int col = 0; col < xGrid; col++) {
                 walls.put(new Position(col, row), false);
             }
         }
 
+        //fill top/bottom walls
         for (int x = 0; x < xGrid; x++) {
             if (!entrances.contains(new Position(x, 0))) {
                 walls.put(new Position(x, 0), true);
@@ -30,6 +29,7 @@ public class MapGenerator {
             }
         }
 
+        //fill left/right walls
         for (int y = 1; y < yGrid - 1; y++) {
             if (!entrances.contains(new Position(0, y))) {
                 walls.put(new Position(0, y), true);
@@ -39,14 +39,16 @@ public class MapGenerator {
             }
         }
 
+        //randomly place walls
         for (int row = 1; row < yGrid - 1; row++) {
             for (int col = 1; col < xGrid - 1; col++) {
-                if (new Random().nextInt(100) < 40) {
+                if (new Random().nextInt(100) < 60) {
                     walls.put(new Position(col, row), true);
                 }
             }
         }
 
+        //run the cell automaton
         for (int i = 0; i < 50; i++) {
             for (int row = 2; row < yGrid - 2; row++) {
                 for (int col = 2; col < xGrid - 2; col++) {
@@ -57,6 +59,27 @@ public class MapGenerator {
                     } else if (count > 5) {
                         walls.put(pos, true);
                     }
+                }
+            }
+        }
+
+        //ensure entrances are connected
+        List<Position> entranceList = new ArrayList<>(entrances);
+        for (int i = 0; i < entranceList.size() - 1; i++) {
+            for (int j = i + 1; j < entranceList.size(); j++) {
+                Position start = entranceList.get(i);
+                Position end = entranceList.get(j);
+                start = new Position(
+                        start.getX() == 0 ? 1 : start.getX() == xGrid - 1 ? xGrid - 2 : start.getX(),
+                        start.getY() == 0 ? 1 : start.getY() == yGrid - 1 ? yGrid - 2 : start.getY()
+                );
+                end = new Position(
+                        end.getX() == 0 ? 1 : end.getX() == xGrid - 1 ? xGrid - 2 : end.getX(),
+                        end.getY() == 0 ? 1 : end.getY() == yGrid - 1 ? yGrid - 2 : end.getY()
+                );
+                Set<Position> path = Walker.createWalk(start, end);
+                for (Position pos : path) {
+                    walls.put(pos, false);
                 }
             }
         }
