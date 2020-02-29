@@ -22,7 +22,8 @@ public class MapController extends TiledMap implements InputProcessor {
     private final int yGrid;
     // add the player
     private Player player;
-    private Position position;
+    private Position playerposition;
+    private Trash banana;
 
     private TiledMapTileLayer baseLayer;
     private TiledMapTileLayer objectLayer;
@@ -31,6 +32,7 @@ public class MapController extends TiledMap implements InputProcessor {
     private TiledMapTileLayer.Cell grass = new TiledMapTileLayer.Cell();
     private TiledMapTileLayer.Cell bush = new TiledMapTileLayer.Cell();
     private TiledMapTileLayer.Cell players = new TiledMapTileLayer.Cell();
+    private TiledMapTileLayer.Cell bananas = new TiledMapTileLayer.Cell();
 
     public MapController(int xGrid, int yGrid) {
         super();
@@ -40,13 +42,16 @@ public class MapController extends TiledMap implements InputProcessor {
         this.ySize = 32*yGrid;
 
         //initialize player
-        this.position = new Position(0,4);
-        this.player = new Player(position);
+        this.playerposition = new Position(0,4);
+        this.player = new Player(playerposition);
+        //initialize trash
+        this.banana = new Trash(new Position(8,6));
 
 
         grass.setTile(new StaticTiledMapTile(new TextureRegion(manager.get("sprites/grass.png", Texture.class))));
         bush.setTile(new StaticTiledMapTile(new TextureRegion(manager.get("sprites/bush.png", Texture.class))));
         players.setTile(new StaticTiledMapTile(new TextureRegion(manager.get("sprites/goodman_L.png", Texture.class))));
+        bananas.setTile(new StaticTiledMapTile(new TextureRegion(manager.get("sprites/banana.png", Texture.class))));
 
         createMap();
     }
@@ -76,6 +81,9 @@ public class MapController extends TiledMap implements InputProcessor {
         layers.add(baseLayer);
         layers.add(objectLayer);
         Gdx.input.setInputProcessor(this);
+
+        // add the trash
+        objectLayer.setCell(8, 6, bananas);
 
     }
 
@@ -120,6 +128,19 @@ public class MapController extends TiledMap implements InputProcessor {
             }
         }
         objectLayer.setCell(player.getposition().getX(), player.getposition().getY(), players);
+
+        if (keycode == Input.Keys.SPACE){
+            if (objectLayer.getCell(player.getposition().getX(),player.getposition().getY()-1) == bananas ||
+                    objectLayer.getCell(player.getposition().getX(),player.getposition().getY()+1) == bananas||
+                    objectLayer.getCell(player.getposition().getX()+1,player.getposition().getY()) == bananas||
+                    objectLayer.getCell(player.getposition().getX()-1,player.getposition().getY()) == bananas){
+                objectLayer.setCell(banana.getPosition().getX(),banana.getPosition().getY(),null);
+                player.pickup(banana);
+            }
+            else{
+                return false;
+            }
+        }
         return false;
     }
 
