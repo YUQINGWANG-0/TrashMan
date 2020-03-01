@@ -18,7 +18,7 @@ public class Program extends ApplicationAdapter {
 	private int frameCount = 0;
 	private MapController mapController;
 	private long startTime;
-	public static final long limit = 60*1000;
+	public static final long limit = 6*1000;
 	private int prevSecs = -1;
 
 	@Override
@@ -59,7 +59,10 @@ public class Program extends ApplicationAdapter {
 		if (remaining <= 0) {
 			Gdx.app.exit();
 			System.out.println();
-			System.out.println("GAME OVER");
+			System.out.println("#----------------------------------------------#");
+			System.out.println("#*******************GAME OVER******************#");
+			System.out.println("#----------------------------------------------#");
+			System.out.println();
 			System.out.println(mapController.getScoreToPrint());
 		}
 	}

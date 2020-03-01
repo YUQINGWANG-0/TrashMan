@@ -11,7 +11,7 @@ public class DesktopLauncher {
 		System.out.println("#----------------------------------------------#");
 		System.out.println("#*******************TrashMan*******************#");
 		System.out.println("#----------------------------------------------#");
-		System.out.println("Move: \t\tarrow keys");
+		System.out.println("Move: \t\t\tarrow keys");
 		System.out.println("Pick up food: \tSPACE");
 		System.out.println("Drop in bin: \tENTER");
 		System.out.println("Kill robot: \tK");
