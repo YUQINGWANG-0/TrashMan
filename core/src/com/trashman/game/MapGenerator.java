@@ -2,6 +2,8 @@ package com.trashman.game;
 
 import java.util.*;
 
+import static java.lang.StrictMath.sqrt;
+
 public class MapGenerator {
 
     static Map<Position, Boolean> generate(int xGrid, int yGrid, Set<Position> entrances) {
@@ -72,7 +74,6 @@ public class MapGenerator {
         for (int i = 0; i < entranceList.size() - 1; i++) {
             for (int j = i + 1; j < entranceList.size(); j++) {
                 Position start = entranceList.get(i);
-                Position middle = new Position(new Random().nextInt(xGrid - 2) + 1, new Random().nextInt(yGrid - 2) + 1);
                 Position end = entranceList.get(j);
                 start = new Position(
                         start.getX() == 0 ? 1 : start.getX() == xGrid - 1 ? xGrid - 2 : start.getX(),
@@ -82,20 +83,74 @@ public class MapGenerator {
                         end.getX() == 0 ? 1 : end.getX() == xGrid - 1 ? xGrid - 2 : end.getX(),
                         end.getY() == 0 ? 1 : end.getY() == yGrid - 1 ? yGrid - 2 : end.getY()
                 );
-                Set<Position> path = createWalk(start, middle);
-                path.addAll(createWalk(middle, end));
+                Set<Position> path = createWalk(start, end);
                 for (Position pos : path) {
                     walls.put(pos, false);
                 }
             }
         }
 
+
         //walls.put(new Position(2, 3), true);
         return walls;
     }
 
-    public static boolean isConnected(Map<Position, Boolean> walls, Position pos) {
-        return true;
+    public static boolean isOnBoard(Position pos, int xGrid, int yGrid){
+        return ((0 < pos.getX() && pos.getX() < xGrid - 1) && (0 < pos.getY() && pos.getY() < yGrid - 1));
+    }
+
+    public static List<Position> getEntrances(Map<Position, Boolean> walls, int xGrid, int yGrid){
+        List<Position> entrances = new ArrayList<>();
+        for (int xi = 0; xi <xGrid; xi++){
+            if (!walls.getOrDefault(new Position(xi, 0), false)){
+                entrances.add(new Position(xi, 0));
+            }
+            if (!walls.getOrDefault(new Position(xi, yGrid -1), false)){
+                entrances.add(new Position(xi, yGrid -1));
+            }
+        }
+        for (int yi = 0; yi <xGrid; yi++){
+            if (!walls.getOrDefault(new Position(0, yi), false)){
+                entrances.add(new Position(0, yi));
+            }
+            if (!walls.getOrDefault(new Position(xGrid -1, yi), false)){
+                entrances.add(new Position(xGrid - 1, yi));
+            }
+        }
+        return entrances;
+    }
+
+    public static Set<Position> connected(Map<Position, Boolean> walls, int xGrid, int yGrid){
+        List<Position> entrances = getEntrances(walls, xGrid, yGrid);
+
+        Position pos = entrances.get(0);
+        Stack<Position> toExplore = new Stack<>();
+        Set<Position> seen = new HashSet<>();
+        toExplore.add(pos);
+        while (!toExplore.empty()){
+            Position node = toExplore.pop();
+            seen.add(node);
+            for (int i = -1; i < 2; i++){
+                if (i == 0) continue;
+                Position toAddX = new Position( node.getX() + i , node.getY() );
+                if (isOnBoard( toAddX ,xGrid,yGrid) && !walls.getOrDefault(toAddX ,false) && !seen.contains(toAddX)){
+                    toExplore.add(toAddX);
+                }
+                Position toAddY = new Position( node.getX(), node.getY() + i );
+                if (isOnBoard( toAddY ,xGrid,yGrid) && !walls.getOrDefault(toAddY ,false) && !seen.contains(toAddY)){
+                    toExplore.add(toAddY);
+                }
+            }
+        }
+
+        return seen;
+    }
+
+    public static boolean isConnected(Map<Position, Boolean> walls, Set<Position> connected, Position pos, int xGrid, int yGrid) {
+        if (walls.getOrDefault(pos,false)) return false;
+        if (!(0 < pos.getX() && pos.getX() < xGrid - 1) || !(0 < pos.getY() && pos.getY() < yGrid - 1)) return false;
+
+        return connected.contains(pos);
     }
 
     private static int countNeighbours(Map<Position, Boolean> walls, Position pos, int xGrid, int yGrid) {

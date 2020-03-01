@@ -15,6 +15,7 @@ public class Section {
     private Random random = new Random();
 
     Set<Position> entrances;
+    Set<Position> connected;
     Map<Position, Boolean> walls;
     private Map<Position, Item> objects = new HashMap<>();
 
@@ -37,6 +38,7 @@ public class Section {
         }
 
         this.walls = MapGenerator.generate(xGrid, yGrid, entrances);
+        connected = MapGenerator.connected(walls, xGrid, yGrid);
 
         robot = new Evil();
         placeObject(robot);
@@ -51,7 +53,7 @@ public class Section {
         Position pos;
         while (true) {
             pos = new Position(random.nextInt(xGrid - 2) + 1, random.nextInt(yGrid - 2) + 1);
-            if (!walls.getOrDefault(pos, false) && MapGenerator.isConnected(walls, pos)) {
+            if (!walls.getOrDefault(pos, false) && MapGenerator.isConnected(walls, connected, pos, xGrid, yGrid)) {
                 objects.put(pos, item);
                 break;
             }
