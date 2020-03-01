@@ -43,7 +43,7 @@ public class MapGenerator {
         //randomly place walls
         for (int row = 1; row < yGrid - 1; row++) {
             for (int col = 1; col < xGrid - 1; col++) {
-                if (new Random().nextInt(100) < 50) {
+                if (new Random().nextInt(100) < 60) {
                     walls.put(new Position(col, row), true);
                 }
             }
@@ -72,6 +72,7 @@ public class MapGenerator {
         for (int i = 0; i < entranceList.size() - 1; i++) {
             for (int j = i + 1; j < entranceList.size(); j++) {
                 Position start = entranceList.get(i);
+                Position middle = new Position(new Random().nextInt(xGrid - 2) + 1, new Random().nextInt(yGrid - 2) + 1);
                 Position end = entranceList.get(j);
                 start = new Position(
                         start.getX() == 0 ? 1 : start.getX() == xGrid - 1 ? xGrid - 2 : start.getX(),
@@ -81,7 +82,8 @@ public class MapGenerator {
                         end.getX() == 0 ? 1 : end.getX() == xGrid - 1 ? xGrid - 2 : end.getX(),
                         end.getY() == 0 ? 1 : end.getY() == yGrid - 1 ? yGrid - 2 : end.getY()
                 );
-                Set<Position> path = createWalk(start, end);
+                Set<Position> path = createWalk(start, middle);
+                path.addAll(createWalk(middle, end));
                 for (Position pos : path) {
                     walls.put(pos, false);
                 }
