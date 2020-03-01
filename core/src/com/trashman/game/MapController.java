@@ -24,12 +24,7 @@ public class MapController extends TiledMap implements InputProcessor {
     private final int yGrid;
     // add the player
     private Player player;
-    private Trash banana;
-    private Bin bin;
     private Evil evil;
-    private Trash paper;
-    private Trash bottle;
-    private Trash chemical;
     HashMap<Trash, TiledMapTileLayer.Cell> trash_map = new HashMap<>();
 
     private Random random = new Random();
@@ -55,7 +50,7 @@ public class MapController extends TiledMap implements InputProcessor {
     private TiledMapTileLayer.Cell green_bins = new TiledMapTileLayer.Cell();
 
     private Map<GameObject, TiledMapTileLayer.Cell> cells = new HashMap<>();
-    private List<Trash> trashList = new ArrayList<>();
+    private final List<GameObject> trashList = List.of(BANANA, BOTTLE, PAPER, CHEMICAL_WASTE);
 
     private Position sectionPos;
     private Section section;
@@ -119,19 +114,11 @@ public class MapController extends TiledMap implements InputProcessor {
         sections = new HashMap<>();
         sections.put(sectionPos, section);
 
-
-        //initialize bin
-        bin = new Bin();
-        section.placeObject(bin);
-
         evil = section.getRobot();
 
         //initialize player
         player = new Player();
         section.placeObject(player);
-
-        banana = new Trash();
-        section.placeObject(banana);
 
         //initialize trash
 //        trash_map.put(BANANA,bananas);
@@ -238,36 +225,24 @@ public class MapController extends TiledMap implements InputProcessor {
                 playerMoved();
                 moveEvil();
             }
-
-            updateTiles();
         }
 
-        while (keycode == Input.Keys.SPACE) {
+        if (keycode == Input.Keys.SPACE) {
 
-            //Iterator i = trashlist.iterator();
-            for (Trash trash : trashList){
-                //GameObject a = PAPER;
-               // System.out.println(trash);
-                if (objectLayer.getCell(player.getPosition().getX(), player.getPosition().getY() - 1) == cells.get(trash.getType()) &&
-                    player.emptybag()){
-                    objectLayer.setCell(player.getPosition().getX(), player.getPosition().getY() - 1, null);
-                    player.pickup(trash);
-                } else if (objectLayer.getCell(player.getPosition().getX(), player.getPosition().getY() + 1) == cells.get(trash.getType()) &&
-                    player.emptybag()) {
-                    objectLayer.setCell(player.getPosition().getX(), player.getPosition().getY() + 1, null);
-                    player.pickup(trash);
-                } else if (objectLayer.getCell(player.getPosition().getX() + 1, player.getPosition().getY()) == cells.get(trash.getType()) &&
-                    player.emptybag()) {
-                    objectLayer.setCell(player.getPosition().getX() + 1, player.getPosition().getY(), null);
-                    player.pickup(trash);
-                } else if (objectLayer.getCell(player.getPosition().getX() - 1, player.getPosition().getY()) == cells.get(trash.getType()) &&
-                    player.emptybag()) {
-                    objectLayer.setCell(player.getPosition().getX() - 1, player.getPosition().getY(), null);
-                    player.pickup(trash);
+            Set<Position> neighbours = Set.of(
+                    player.getPosition().add(1, 0),
+                    player.getPosition().add(-1, 0),
+                    player.getPosition().add(0, 1),
+                    player.getPosition().add(0, -1)
+            );
+
+            for (Position pos : neighbours) {
+                Item item = section.getObject(pos);
+                if (item instanceof Trash) {
+                    player.pickup((Trash) item);
+                    section.removeObject(item);
                 }
             }
-
-            return false;
         }
 
         if (keycode == Input.Keys.ENTER) {
@@ -276,12 +251,12 @@ public class MapController extends TiledMap implements InputProcessor {
                     objectLayer.getCell(player.getPosition().getX() + 1, player.getPosition().getY()) == bins ||
                     objectLayer.getCell(player.getPosition().getX() - 1, player.getPosition().getY()) == bins) &&
                     !player.checkbag()) {
-                objectLayer.setCell(bin.getPosition().getX(), bin.getPosition().getY(), null);
+                //objectLayer.setCell(bin.getPosition().getX(), bin.getPosition().getY(), null);
                 player.putdown();
-            } else {
-                return false;
             }
         }
+
+        updateTiles();
 
         return false;
     }
@@ -297,17 +272,18 @@ public class MapController extends TiledMap implements InputProcessor {
         //test if future evil position is free
         if (section.isEmpty(newPos)) {
             //decide that after every 3rd movement the robot leaves a banana
-            dropTrash();
+            Position oldPos = new Position(evil.getPosition().getX(), evil.getPosition().getY());
             section.moveObject(evil, newPos);
+            dropTrash(oldPos);
         }
     }
 
-    public void dropTrash(){
+    public void dropTrash(Position pos){
         counter++;
         if (counter%3 == 0){
-            banana = new Trash();
-            section.placeObject(banana, evil.getPosition());
+            section.placeObject(new Trash(Trash.trashSet.get(random.nextInt(Trash.trashSet.size()))), pos);
         }
+
     }
 
     @Override
