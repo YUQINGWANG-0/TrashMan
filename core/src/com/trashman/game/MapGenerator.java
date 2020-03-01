@@ -54,7 +54,7 @@ public class MapGenerator {
             for (int row = 1; row < yGrid - 1; row++) {
                 for (int col = 1; col < xGrid - 1; col++) {
                     Position pos = new Position(col, row);
-                    int neighbours = getNeighbours(walls, pos, xGrid, yGrid);
+                    int neighbours = countNeighbours(walls, pos, xGrid, yGrid);
                     int freeSpaces = 8 - neighbours;
 
                     if (freeSpaces < 3) {
@@ -81,7 +81,7 @@ public class MapGenerator {
                         end.getX() == 0 ? 1 : end.getX() == xGrid - 1 ? xGrid - 2 : end.getX(),
                         end.getY() == 0 ? 1 : end.getY() == yGrid - 1 ? yGrid - 2 : end.getY()
                 );
-                Set<Position> path = Walker.createWalk(start, end);
+                Set<Position> path = createWalk(start, end);
                 for (Position pos : path) {
                     walls.put(pos, false);
                 }
@@ -92,7 +92,11 @@ public class MapGenerator {
         return walls;
     }
 
-    static int getNeighbours(Map<Position, Boolean> walls, Position pos, int xGrid, int yGrid) {
+    public static boolean isConnected(Map<Position, Boolean> walls, Position pos) {
+        return true;
+    }
+
+    private static int countNeighbours(Map<Position, Boolean> walls, Position pos, int xGrid, int yGrid) {
         assert (0 < pos.getX() && pos.getX() < xGrid - 1);
         assert (0 < pos.getY() && pos.getY() < yGrid - 1);
 
@@ -106,5 +110,30 @@ public class MapGenerator {
         }
 
         return count;
+    }
+
+    public static Set<Position> createWalk(Position start, Position end) {
+        Set<Position> toReturn = new HashSet<>();
+        toReturn.add(start);
+
+        int dx = Math.abs(end.getX() - start.getX());
+        int dy = Math.abs(end.getY() - start.getY());
+
+        int currentX = start.getX();
+        int currentY = start.getY();
+
+        while (dx + dy > 0){
+            Random rand = new Random();
+            int nextInt = rand.nextInt(dx + dy);
+            if (nextInt >= dx) { // it is dy that we decrement
+                currentY += end.getY() > start.getY() ? 1 : -1;
+                dy--;
+            } else {
+                currentX += end.getX() > start.getX() ? 1 : -1;
+                dx--;
+            }
+            toReturn.add(new Position(currentX, currentY));
+        }
+        return toReturn;
     }
 }
