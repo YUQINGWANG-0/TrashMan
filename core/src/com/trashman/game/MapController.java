@@ -32,6 +32,7 @@ public class MapController extends TiledMap implements InputProcessor {
 
     private TiledMapTileLayer baseLayer;
     private TiledMapTileLayer objectLayer;
+    private TiledMapTileLayer carryLayer;
     private AssetManager manager = Assets.manager;
 
     //adding all tilemap layer fields
@@ -99,9 +100,11 @@ public class MapController extends TiledMap implements InputProcessor {
 
         baseLayer = new TiledMapTileLayer(xSize, ySize, 32, 32);
         objectLayer = new TiledMapTileLayer(xSize, ySize, 32, 32);
+        carryLayer = new TiledMapTileLayer(xSize, ySize, 32, 32);
 
         layers.add(baseLayer);
         layers.add(objectLayer);
+        layers.add(carryLayer);
         Gdx.input.setInputProcessor(this);
 
         // add the trash
@@ -189,16 +192,20 @@ public class MapController extends TiledMap implements InputProcessor {
         for (int row = 0; row < xGrid; row++) {
             for (int col = 0; col < yGrid; col++) {
                 baseLayer.setCell(col, row, grass);
+                carryLayer.setCell(col, row, null);
                 Position pos = new Position(col, row);
                 if (section.walls.getOrDefault(pos, false)) {
                     objectLayer.setCell(col, row, bush);
                 } else if (section.getObject(pos) != null) {
-                    GameObject type = section.getObject(pos).getType();
                     objectLayer.setCell(col, row, cells.get(section.getObject(pos).getType()));
                 } else {
                     objectLayer.setCell(col, row, null);
                 }
             }
+        }
+
+        if (!player.bagEmpty()) {
+            carryLayer.setCell(player.getPosition().getX(), player.getPosition().getY(), cells.get(player.getTrash().getType()));
         }
     }
 
@@ -226,19 +233,18 @@ public class MapController extends TiledMap implements InputProcessor {
                 moveEvil();
             }
         }
+        Set<Position> neighbours = Set.of(
+                player.getPosition().add(1, 0),
+                player.getPosition().add(-1, 0),
+                player.getPosition().add(0, 1),
+                player.getPosition().add(0, -1)
+        );
 
         if (keycode == Input.Keys.SPACE) {
 
-            Set<Position> neighbours = Set.of(
-                    player.getPosition().add(1, 0),
-                    player.getPosition().add(-1, 0),
-                    player.getPosition().add(0, 1),
-                    player.getPosition().add(0, -1)
-            );
-
             for (Position pos : neighbours) {
                 Item item = section.getObject(pos);
-                if (item instanceof Trash) {
+                if (item instanceof Trash && player.bagEmpty()) {
                     player.pickup((Trash) item);
                     section.removeObject(item);
                 }
@@ -246,13 +252,11 @@ public class MapController extends TiledMap implements InputProcessor {
         }
 
         if (keycode == Input.Keys.ENTER) {
-            if ((objectLayer.getCell(player.getPosition().getX(), player.getPosition().getY() - 1) == bins ||
-                    objectLayer.getCell(player.getPosition().getX(), player.getPosition().getY() + 1) == bins ||
-                    objectLayer.getCell(player.getPosition().getX() + 1, player.getPosition().getY()) == bins ||
-                    objectLayer.getCell(player.getPosition().getX() - 1, player.getPosition().getY()) == bins) &&
-                    !player.checkbag()) {
-                //objectLayer.setCell(bin.getPosition().getX(), bin.getPosition().getY(), null);
-                player.putdown();
+
+            for (Position pos : neighbours) {
+                if (section.getBin().position.equals(pos) && !player.bagEmpty()) {
+                    player.putdown();
+                }
             }
         }
 

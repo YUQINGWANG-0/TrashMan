@@ -10,29 +10,20 @@ public class Player extends Item {
     }
 
     public void pickup (Trash newtrash){
-        trash = newtrash;
-
+        if (bagEmpty()) {
+            trash = newtrash;
+        }
     }
 
-    public boolean checkbag(){
-        if (trash == null){
-            return true;
-        }
-        else {
-            return false;
-        }
+    public boolean bagEmpty(){
+        return trash == null;
     }
 
     public void putdown(){
         trash = null;
     }
 
-    public boolean emptybag(){
-        if (trash == null){
-            return false;
-        }
-        else {
-            return true;
-        }
+    public Trash getTrash() {
+        return trash;
     }
 }

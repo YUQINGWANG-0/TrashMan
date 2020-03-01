@@ -11,11 +11,12 @@ public class Section {
     private final int yGrid;
 
     private Evil robot;
+    private Bin bin;
 
     private Random random = new Random();
 
-    Set<Position> entrances;
-    Set<Position> connected;
+    private Set<Position> entrances;
+    private Set<Position> connected;
     Map<Position, Boolean> walls;
     private Map<Position, Item> objects = new HashMap<>();
 
@@ -42,6 +43,9 @@ public class Section {
 
         robot = new Evil();
         placeObject(robot);
+
+        bin = new Bin();
+        placeObject(bin);
     }
 
 
@@ -53,7 +57,7 @@ public class Section {
         Position pos;
         while (true) {
             pos = new Position(random.nextInt(xGrid - 2) + 1, random.nextInt(yGrid - 2) + 1);
-            if (!walls.getOrDefault(pos, false) && MapGenerator.isConnected(walls, connected, pos, xGrid, yGrid)) {
+            if (!walls.getOrDefault(pos, false) && objects.get(pos) == null && MapGenerator.isConnected(walls, connected, pos, xGrid, yGrid)) {
                 objects.put(pos, item);
                 break;
             }
@@ -106,5 +110,9 @@ public class Section {
 
     public Evil getRobot() {
         return robot;
+    }
+
+    public Bin getBin() {
+        return bin;
     }
 }
