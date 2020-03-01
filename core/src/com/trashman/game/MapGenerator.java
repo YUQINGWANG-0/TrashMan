@@ -92,6 +92,7 @@ public class MapGenerator {
         return walls;
     }
 
+    //counting the number of neighbours a wall has to repopulate the map
     static int getNeighbours(Map<Position, Boolean> walls, Position pos, int xGrid, int yGrid) {
         assert (0 < pos.getX() && pos.getX() < xGrid - 1);
         assert (0 < pos.getY() && pos.getY() < yGrid - 1);

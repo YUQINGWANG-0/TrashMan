@@ -10,5 +10,10 @@ public class Bin {
     public Position getPosition(){
         return position;
     }
+
+    public void setPosition(int x, int y) {
+        position.setX(x);
+        position.setY(y);
+    }
 }
 
