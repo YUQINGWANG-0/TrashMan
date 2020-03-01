@@ -12,7 +12,11 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 //import jdk.internal.util.xml.impl.Pair;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.trashman.game.GameObject.*;
@@ -24,10 +28,13 @@ public class MapController extends TiledMap implements InputProcessor {
     private final int yGrid;
     // add the player
     private Player player;
+    private Trash banana;
     private Bin bin;
     private Evil evil;
+    private Trash paper;
+    private Trash bottle;
+    private Trash chemical;
     HashMap<Trash, TiledMapTileLayer.Cell> trash_map = new HashMap<>();
-    List<GameObject> trashlist = new ArrayList<>();
 
 
     private TiledMapTileLayer baseLayer;
@@ -91,14 +98,6 @@ public class MapController extends TiledMap implements InputProcessor {
 
         cells.put(HERO, players);
         cells.put(BANANA, bananas);
-        cells.put(BOTTLE,bottles);
-        cells.put(CHEMICAL_WASTE,chemicals);
-        cells.put(PAPER,papers);
-        trashlist.add(PAPER);
-        trashlist.add(BOTTLE);
-        trashlist.add(CHEMICAL_WASTE);
-        trashlist.add(BANANA);
-
 
         sectionPos = new Position(0, 0);
 
@@ -126,6 +125,13 @@ public class MapController extends TiledMap implements InputProcessor {
         section = new Section(xGrid, yGrid, new HashSet<>());
         sections = new HashMap<>();
         sections.put(sectionPos, section);
+
+
+        //initialize bin
+        bin = new Bin();
+        section.placeObject(bin);
+
+        evil = section.getRobot();
 
         //initialize player
         this.player = new Player(new Position(0,0));
@@ -160,7 +166,7 @@ public class MapController extends TiledMap implements InputProcessor {
         //generate the walls
         Map<Position, Boolean> walls = MapGenerator.generate(xGrid, yGrid, entrances);
 
-        //drawing the wall bushes onto the map
+        //drawing the wallbushes onto the map
         for (int row = 0; row < xGrid; row++) {
             for (int col = 0; col < yGrid; col++) {
                 baseLayer.setCell(col, row, grass);
@@ -249,7 +255,6 @@ public class MapController extends TiledMap implements InputProcessor {
             }
         }
     }
-
 
     @Override
     public boolean keyDown(int keycode) {

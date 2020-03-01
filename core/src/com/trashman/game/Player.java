@@ -60,6 +60,9 @@ public class Player {
 
     public boolean emptybag(){
         if (trash == null){
+            return false;
+        }
+        else {
             return true;
         }
         else {
