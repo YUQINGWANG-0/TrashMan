@@ -6,6 +6,8 @@ During the game TrashMan has to pick up as many trash items as he can and put th
 However, a robot designed by EvilCorp. Inc. is constantly dropping new trash items in the forest. :smiling_imp:
 Can you beat EvilCorp. Inc. and rescue the world from overpolution? 
 
+![Game Preview](/image/gallery3.png)
+
 ## Navigation :computer:
 You navigate TrashMan with your **arrow keys**. Items can be picked up trash with the **space key** when it is in your proximity 
 (either above, below or besides you). You can bin items with **Enter** when you are in the proximity of the correct bin. 
