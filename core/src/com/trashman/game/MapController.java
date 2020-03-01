@@ -12,11 +12,7 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 //import jdk.internal.util.xml.impl.Pair;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.trashman.game.GameObject.*;
@@ -28,13 +24,10 @@ public class MapController extends TiledMap implements InputProcessor {
     private final int yGrid;
     // add the player
     private Player player;
-    private Trash banana;
     private Bin bin;
     private Evil evil;
-    private Trash paper;
-    private Trash bottle;
-    private Trash chemical;
     HashMap<Trash, TiledMapTileLayer.Cell> trash_map = new HashMap<>();
+    List<GameObject> trashlist = new ArrayList<>();
 
 
     private TiledMapTileLayer baseLayer;
@@ -98,6 +91,14 @@ public class MapController extends TiledMap implements InputProcessor {
 
         cells.put(HERO, players);
         cells.put(BANANA, bananas);
+        cells.put(BOTTLE,bottles);
+        cells.put(CHEMICAL_WASTE,chemicals);
+        cells.put(PAPER,papers);
+        trashlist.add(PAPER);
+        trashlist.add(BOTTLE);
+        trashlist.add(CHEMICAL_WASTE);
+        trashlist.add(BANANA);
+
 
         sectionPos = new Position(0, 0);
 
@@ -135,14 +136,10 @@ public class MapController extends TiledMap implements InputProcessor {
         section.placeObject(BANANA);
 
         //initialize trash
-//        this.paper = new Trash(new Position(8,7));
-//        this.banana = new Trash(new Position(10,6));
-//        this.bottle = new Trash(new Position(10,16));
-//        this.chemical = new Trash(new Position(10,26));
-//        trash_map.put(banana,bananas);
-//        trash_map.put(paper,papers);
-//        trash_map.put(bottle,bottles);
-//        trash_map.put(chemical,chemicals);
+//        trash_map.put(BANANA,bananas);
+//        trash_map.put(PAPER,papers);
+//        trash_map.put(BOTTLE,bottles);
+//        trash_map.put(CHEMICAL_WASTE,chemicals);
 
         updateTiles();
     }
@@ -163,7 +160,7 @@ public class MapController extends TiledMap implements InputProcessor {
         //generate the walls
         Map<Position, Boolean> walls = MapGenerator.generate(xGrid, yGrid, entrances);
 
-        //drawing the wallbushes onto the map
+        //drawing the wall bushes onto the map
         for (int row = 0; row < xGrid; row++) {
             for (int col = 0; col < yGrid; col++) {
                 baseLayer.setCell(col, row, grass);
@@ -302,33 +299,42 @@ public class MapController extends TiledMap implements InputProcessor {
         objectLayer.setCell(player.getposition().getX(), player.getposition().getY(), players);
 
         if (keycode == Input.Keys.SPACE) {
-            for(Map.Entry<Trash, TiledMapTileLayer.Cell> entry : trash_map.entrySet()){
-                if ((objectLayer.getCell(player.getposition().getX(), player.getposition().getY() - 1) == entry.getValue() ||
-                        objectLayer.getCell(player.getposition().getX(), player.getposition().getY() + 1) == entry.getValue() ||
-                        objectLayer.getCell(player.getposition().getX() + 1, player.getposition().getY()) == entry.getValue() ||
-                        objectLayer.getCell(player.getposition().getX() - 1, player.getposition().getY()) == entry.getValue()) &&
-                        player.checkbag()) {
-                    objectLayer.setCell(entry.getKey().getPosition().getX(), entry.getKey().getPosition().getY(), null);
-                    player.pickup(entry.getKey());
+
+            for (GameObject i : trashlist) {
+                if (objectLayer.getCell(player.getposition().getX(), player.getposition().getY() - 1) == cells.get(i)) {
+                    objectLayer.setCell(player.getposition().getX(), player.getposition().getY() - 1, null);
+                } else if (objectLayer.getCell(player.getposition().getX(), player.getposition().getY() + 1) == cells.get(i)) {
+                    objectLayer.setCell(player.getposition().getX(), player.getposition().getY() + 1, null);
+                } else if (objectLayer.getCell(player.getposition().getX() + 1, player.getposition().getY()) == cells.get(i)) {
+                    objectLayer.setCell(player.getposition().getX() + 1, player.getposition().getY(), null);
+                } else if (objectLayer.getCell(player.getposition().getX() - 1, player.getposition().getY()) == cells.get(i)) {
+                    objectLayer.setCell(player.getposition().getX() - 1, player.getposition().getY(), null);
+                } else {
+                    return false;
+                }  //player.pickup(i);
+
+
+            }
+
+            if (keycode == Input.Keys.ENTER) {
+                if ((objectLayer.getCell(player.getposition().getX(), player.getposition().getY() - 1) == bins ||
+                        objectLayer.getCell(player.getposition().getX(), player.getposition().getY() + 1) == bins ||
+                        objectLayer.getCell(player.getposition().getX() + 1, player.getposition().getY()) == bins ||
+                        objectLayer.getCell(player.getposition().getX() - 1, player.getposition().getY()) == bins) &&
+                        !player.checkbag()) {
+                    objectLayer.setCell(bin.getPosition().getX(), bin.getPosition().getY(), null);
+                    player.putdown();
                 } else {
                     return false;
                 }
             }
-        }
-        if (keycode == Input.Keys.ENTER) {
-            if ((objectLayer.getCell(player.getposition().getX(), player.getposition().getY() - 1) == bins ||
-                    objectLayer.getCell(player.getposition().getX(), player.getposition().getY() + 1) == bins ||
-                    objectLayer.getCell(player.getposition().getX() + 1, player.getposition().getY()) == bins ||
-                    objectLayer.getCell(player.getposition().getX() - 1, player.getposition().getY()) == bins) &&
-                    !player.checkbag()) {
-                objectLayer.setCell(bin.getPosition().getX(), bin.getPosition().getY(), null);
-                player.putdown();
-            } else {
-                return false;
-            }
-        }
-        return false;
+        } else {
+            return false;
+        } return false;
     }
+
+
+
     //moving loop to move the evil figure
     public void moveEvil(){
         //setting moving values to 0
@@ -355,8 +361,11 @@ public class MapController extends TiledMap implements InputProcessor {
     public void droptrash(){
         counter++;
         if (counter%3 == 0){
-            banana = new Trash(new Position(evil.getPosition().getX(),evil.getPosition().getY()));
-            objectLayer.setCell(evil.getPosition().getX(), evil.getPosition().getY(), bananas);
+            Random rand = new Random();
+            GameObject i = trashlist.get(rand.nextInt(trashlist.size()));
+            //Trash banana2 = new Trash(new Position(evil.getPosition().getX(), evil.getPosition().getY()));
+            objectLayer.setCell(evil.getPosition().getX(), evil.getPosition().getY(), cells.get(i));
+
         }
     }
 
