@@ -2,7 +2,7 @@ package com.trashman.game;
 
 public class Player {
     private Position position;
-    private Trash trash;
+    private GameObject trash;
     // private boolean bag;
 
     public Player(Position position){
@@ -10,7 +10,7 @@ public class Player {
         trash = null;
     }
 
-    public void pickup (Trash newtrash){
+    public void pickup (GameObject newtrash){
         trash = newtrash;
 
     }
@@ -58,12 +58,12 @@ public class Player {
         position.setY(y);
     }
 
-    public boolean fullbag(){
+    public boolean emptybag(){
         if (trash == null){
-            return false;
+            return true;
         }
         else {
-            return true;
+            return false;
         }
     }
 }

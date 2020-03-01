@@ -250,6 +250,7 @@ public class MapController extends TiledMap implements InputProcessor {
         }
     }
 
+
     @Override
     public boolean keyDown(int keycode) {
         if (keycode == Input.Keys.DPAD_RIGHT) {
@@ -298,22 +299,30 @@ public class MapController extends TiledMap implements InputProcessor {
         }
         objectLayer.setCell(player.getposition().getX(), player.getposition().getY(), players);
 
-        if (keycode == Input.Keys.SPACE) {
+        while (keycode == Input.Keys.SPACE) {
 
-            for (GameObject i : trashlist) {
-                if (objectLayer.getCell(player.getposition().getX(), player.getposition().getY() - 1) == cells.get(i)) {
-                    objectLayer.setCell(player.getposition().getX(), player.getposition().getY() - 1, null);
-                } else if (objectLayer.getCell(player.getposition().getX(), player.getposition().getY() + 1) == cells.get(i)) {
-                    objectLayer.setCell(player.getposition().getX(), player.getposition().getY() + 1, null);
-                } else if (objectLayer.getCell(player.getposition().getX() + 1, player.getposition().getY()) == cells.get(i)) {
-                    objectLayer.setCell(player.getposition().getX() + 1, player.getposition().getY(), null);
-                } else if (objectLayer.getCell(player.getposition().getX() - 1, player.getposition().getY()) == cells.get(i)) {
-                    objectLayer.setCell(player.getposition().getX() - 1, player.getposition().getY(), null);
-                } else {
-                    return false;
-                }  //player.pickup(i);
-
-
+            //Iterator i = trashlist.iterator();
+                for (GameObject trash:trashlist){
+                    //GameObject a = PAPER;
+                   // System.out.println(trash);
+                    if (objectLayer.getCell(player.getposition().getX(), player.getposition().getY() - 1) == cells.get(trash) &&
+                        player.emptybag()){
+                        objectLayer.setCell(player.getposition().getX(), player.getposition().getY() - 1, null);
+                        player.pickup((GameObject) trash);
+                    } else if (objectLayer.getCell(player.getposition().getX(), player.getposition().getY() + 1) == cells.get(trash) &&
+                        player.emptybag()) {
+                        objectLayer.setCell(player.getposition().getX(), player.getposition().getY() + 1, null);
+                        player.pickup((GameObject) trash);
+                    } else if (objectLayer.getCell(player.getposition().getX() + 1, player.getposition().getY()) == cells.get(trash) &&
+                        player.emptybag()) {
+                        objectLayer.setCell(player.getposition().getX() + 1, player.getposition().getY(), null);
+                        player.pickup((GameObject) trash);
+                    } else if (objectLayer.getCell(player.getposition().getX() - 1, player.getposition().getY()) == cells.get(trash) &&
+                        player.emptybag()) {
+                        objectLayer.setCell(player.getposition().getX() - 1, player.getposition().getY(), null);
+                        player.pickup((GameObject) trash);
+                    }
+                }return false;
             }
 
             if (keycode == Input.Keys.ENTER) {
@@ -327,11 +336,10 @@ public class MapController extends TiledMap implements InputProcessor {
                 } else {
                     return false;
                 }
-            }
-        } else {
-            return false;
-        } return false;
-    }
+            } return false;
+        }
+
+
 
 
 
@@ -364,8 +372,8 @@ public class MapController extends TiledMap implements InputProcessor {
             Random rand = new Random();
             GameObject i = trashlist.get(rand.nextInt(trashlist.size()));
             //Trash banana2 = new Trash(new Position(evil.getPosition().getX(), evil.getPosition().getY()));
-            objectLayer.setCell(evil.getPosition().getX(), evil.getPosition().getY(), cells.get(i));
-
+            //section.placeObject(i);
+            objectLayer.setCell(evil.getPosition().getX(), evil.getPosition().getY(),cells.get(i));
         }
     }
 
