@@ -7,11 +7,19 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.math.Interpolation;
+
+import java.io.BufferedReader;
+import java.util.Scanner;
 
 public class Program extends ApplicationAdapter {
 	private OrthographicCamera camera;
 	private TiledMapRenderer tiledMapRenderer;
 	private int frameCount = 0;
+	private MapController mapController;
+	private long startTime;
+	public static final long limit = 60*1000;
+	private int prevSecs = -1;
 
 	@Override
 	public void create () {
@@ -22,7 +30,10 @@ public class Program extends ApplicationAdapter {
 		camera.setToOrtho(false,w,h);
 		camera.update();
 
-		tiledMapRenderer = new OrthogonalTiledMapRenderer(new MapController(20,20));
+		mapController = new MapController(20,20);
+		tiledMapRenderer = new OrthogonalTiledMapRenderer(mapController);
+
+		startTime = System.currentTimeMillis();
 	}
 
 	@Override
@@ -34,8 +45,24 @@ public class Program extends ApplicationAdapter {
 		camera.update();
 		tiledMapRenderer.setView(camera);
 		tiledMapRenderer.render();
-	}
 
+		long elapsed = System.currentTimeMillis() - startTime;
+		long remaining = limit - elapsed;
+		int mins = (int) remaining/60000;
+		int secs = (int) ((remaining - mins*60000)/1000);
+
+		if (secs != prevSecs) {
+			System.out.println("Time remaining: \t" + mins + ":" + (secs < 10 ? "0" : "") + secs + " \t" + mapController.getScoreToPrint());
+		}
+		prevSecs = secs;
+
+		if (remaining <= 0) {
+			Gdx.app.exit();
+			System.out.println();
+			System.out.println("GAME OVER");
+			System.out.println(mapController.getScoreToPrint());
+		}
+	}
 
 	
 	@Override

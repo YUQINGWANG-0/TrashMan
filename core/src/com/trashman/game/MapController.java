@@ -127,8 +127,6 @@ public class MapController extends TiledMap implements InputProcessor {
         player = new Player();
         section.placeObject(player);
 
-        printScore();
-
         updateTiles();
     }
 
@@ -265,7 +263,6 @@ public class MapController extends TiledMap implements InputProcessor {
                 if (section.getBin().position.equals(pos) && !player.bagEmpty()) {
                     player.putdown();
                     trashCount++;
-                    printScore();
                 }
             }
         }
@@ -276,7 +273,6 @@ public class MapController extends TiledMap implements InputProcessor {
                     evil.kill();
                     evils.setRotation(1);
                     killCount++;
-                    printScore();
                 }
             }
         }
@@ -315,8 +311,8 @@ public class MapController extends TiledMap implements InputProcessor {
 
     }
 
-    private void printScore() {
-        System.out.println("Kills: \t" + killCount + "\tTrash: \t" + trashCount);
+    public String getScoreToPrint() {
+        return "Kills: \t" + killCount + "\tTrash: \t" + trashCount;
     }
 
     @Override
