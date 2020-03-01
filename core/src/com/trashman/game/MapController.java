@@ -29,6 +29,9 @@ public class MapController extends TiledMap implements InputProcessor {
 
     private Random random = new Random();
 
+    private int killCount = 0;
+    private int trashCount = 0;
+
     private TiledMapTileLayer baseLayer;
     private TiledMapTileLayer objectLayer;
     private TiledMapTileLayer carryLayer;
@@ -124,11 +127,7 @@ public class MapController extends TiledMap implements InputProcessor {
         player = new Player();
         section.placeObject(player);
 
-        //initialize trash
-//        trash_map.put(BANANA,bananas);
-//        trash_map.put(PAPER,papers);
-//        trash_map.put(BOTTLE,bottles);
-//        trash_map.put(CHEMICAL_WASTE,chemicals);
+        printScore();
 
         updateTiles();
     }
@@ -265,6 +264,8 @@ public class MapController extends TiledMap implements InputProcessor {
             for (Position pos : neighbours) {
                 if (section.getBin().position.equals(pos) && !player.bagEmpty()) {
                     player.putdown();
+                    trashCount++;
+                    printScore();
                 }
             }
         }
@@ -273,8 +274,9 @@ public class MapController extends TiledMap implements InputProcessor {
             for (Position pos : neighbours) {
                 if (section.getRobot().position.equals(pos)) {
                     evil.kill();
-                    //section.removeObject(evil);
                     evils.setRotation(1);
+                    killCount++;
+                    printScore();
                 }
             }
         }
@@ -305,12 +307,16 @@ public class MapController extends TiledMap implements InputProcessor {
         }
     }
 
-    public void dropTrash(Position pos){
+    private void dropTrash(Position pos){
         counter++;
         if (counter%3 == 0){
             section.placeObject(new Trash(Trash.trashSet.get(random.nextInt(Trash.trashSet.size()))), pos);
         }
 
+    }
+
+    private void printScore() {
+        System.out.println("Kills: \t" + killCount + "\tTrash: \t" + trashCount);
     }
 
     @Override
