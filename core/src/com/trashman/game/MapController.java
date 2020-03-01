@@ -11,6 +11,7 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -23,8 +24,13 @@ public class MapController extends TiledMap implements InputProcessor {
     // add the player
     private Player player;
     private Position playerposition;
-    private Trash banana;
     private Bin bin;
+    private Trash banana;
+    private Trash paper;
+    private Trash bottle;
+    private Trash chemical;
+    HashMap<Trash, TiledMapTileLayer.Cell> trash_map = new HashMap<>();
+
 
     private TiledMapTileLayer baseLayer;
     private TiledMapTileLayer objectLayer;
@@ -34,6 +40,9 @@ public class MapController extends TiledMap implements InputProcessor {
     private TiledMapTileLayer.Cell bush = new TiledMapTileLayer.Cell();
     private TiledMapTileLayer.Cell players = new TiledMapTileLayer.Cell();
     private TiledMapTileLayer.Cell bananas = new TiledMapTileLayer.Cell();
+    private TiledMapTileLayer.Cell papers = new TiledMapTileLayer.Cell();
+    private TiledMapTileLayer.Cell bottles = new TiledMapTileLayer.Cell();
+    private TiledMapTileLayer.Cell chemicals = new TiledMapTileLayer.Cell();
     private TiledMapTileLayer.Cell bins = new TiledMapTileLayer.Cell();
 
     public MapController(int xGrid, int yGrid) {
@@ -47,16 +56,28 @@ public class MapController extends TiledMap implements InputProcessor {
         this.playerposition = new Position(0,4);
         this.player = new Player(playerposition);
         //initialize trash
-        this.banana = new Trash(new Position(8,6));
+        this.paper = new Trash(new Position(8,7));
+        this.banana = new Trash(new Position(10,6));
+        this.bottle = new Trash(new Position(55,16));
+        this.chemical = new Trash(new Position(12,26));
+        trash_map.put(banana,bananas);
+        trash_map.put(paper,papers);
+        trash_map.put(bottle,bottles);
+        trash_map.put(chemical,chemicals);
+
         //initialize bin
-        this.bin = new Bin(new Position(10,11));
+        this.bin = new Bin(new Position(20,22));
 
 
         grass.setTile(new StaticTiledMapTile(new TextureRegion(manager.get("sprites/grass.png", Texture.class))));
         bush.setTile(new StaticTiledMapTile(new TextureRegion(manager.get("sprites/bush.png", Texture.class))));
         players.setTile(new StaticTiledMapTile(new TextureRegion(manager.get("sprites/goodman_L.png", Texture.class))));
+
+        //initialize all the trashes
+        papers.setTile(new StaticTiledMapTile(new TextureRegion(manager.get("sprites/paper.png", Texture.class))));
         bananas.setTile(new StaticTiledMapTile(new TextureRegion(manager.get("sprites/banana.png", Texture.class))));
-        bins.setTile(new StaticTiledMapTile(new TextureRegion(manager.get("sprites/bin_red.png", Texture.class))));
+        bottles.setTile(new StaticTiledMapTile(new TextureRegion(manager.get("sprites/bottle.png", Texture.class))));
+        chemicals.setTile(new StaticTiledMapTile(new TextureRegion(manager.get("sprites/chemical_waste.png", Texture.class))));
 
         createMap();
     }
@@ -91,7 +112,9 @@ public class MapController extends TiledMap implements InputProcessor {
         Gdx.input.setInputProcessor(this);
 
         // add the trash
-        objectLayer.setCell(8, 6, bananas);
+        for(Map.Entry<Trash, TiledMapTileLayer.Cell> entry : trash_map.entrySet()){
+            objectLayer.setCell(entry.getKey().getPosition().getX(),entry.getKey().getPosition().getY(),entry.getValue());
+        }
 
         // add the bin
         objectLayer.setCell(10,11,bins);
@@ -137,16 +160,19 @@ public class MapController extends TiledMap implements InputProcessor {
         objectLayer.setCell(player.getposition().getX(), player.getposition().getY(), players);
 
         if (keycode == Input.Keys.SPACE) {
-            if ((objectLayer.getCell(player.getposition().getX(), player.getposition().getY() - 1) == bananas ||
-                    objectLayer.getCell(player.getposition().getX(), player.getposition().getY() + 1) == bananas ||
-                    objectLayer.getCell(player.getposition().getX() + 1, player.getposition().getY()) == bananas ||
-                    objectLayer.getCell(player.getposition().getX() - 1, player.getposition().getY()) == bananas) &&
-                    player.checkbag()) {
-                objectLayer.setCell(banana.getPosition().getX(), banana.getPosition().getY(), null);
-                player.pickup(banana);
-            } else {
-                return false;
+            for(Map.Entry<Trash, TiledMapTileLayer.Cell> entry : trash_map.entrySet()){
+                if ((objectLayer.getCell(player.getposition().getX(), player.getposition().getY() - 1) == entry.getValue() ||
+                        objectLayer.getCell(player.getposition().getX(), player.getposition().getY() + 1) == entry.getValue() ||
+                        objectLayer.getCell(player.getposition().getX() + 1, player.getposition().getY()) == entry.getValue() ||
+                        objectLayer.getCell(player.getposition().getX() - 1, player.getposition().getY()) == entry.getValue()) &&
+                        player.checkbag()) {
+                    objectLayer.setCell(entry.getKey().getPosition().getX(), entry.getKey().getPosition().getY(), null);
+                    player.pickup(entry.getKey());
+                } else {
+                    return false;
+                }
             }
+
         }
         if (keycode == Input.Keys.ENTER) {
             if ((objectLayer.getCell(player.getposition().getX(), player.getposition().getY() - 1) == bins ||
