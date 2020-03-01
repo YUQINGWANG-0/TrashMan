@@ -127,6 +127,7 @@ public class MapController extends TiledMap implements InputProcessor {
             if (objectLayer.getCell(player.getposition().getX() + 1, player.getposition().getY()) == null) {
                 objectLayer.setCell(player.getposition().getX(), player.getposition().getY(), null);
                 player.moveright();
+                moveEvil();
             } else {
                 return false;
             }
@@ -135,6 +136,7 @@ public class MapController extends TiledMap implements InputProcessor {
             if (objectLayer.getCell(player.getposition().getX() - 1, player.getposition().getY()) == null) {
                 objectLayer.setCell(player.getposition().getX(), player.getposition().getY(), null);
                 player.moveleft();
+                moveEvil();
             } else {
                 return false;
             }
@@ -143,6 +145,7 @@ public class MapController extends TiledMap implements InputProcessor {
             if (objectLayer.getCell(player.getposition().getX(), player.getposition().getY() + 1) == null) {
                 objectLayer.setCell(player.getposition().getX(), player.getposition().getY(), null);
                 player.moveup();
+                moveEvil();
             } else {
                 return false;
             }
@@ -151,6 +154,7 @@ public class MapController extends TiledMap implements InputProcessor {
             if (objectLayer.getCell(player.getposition().getX(), player.getposition().getY() - 1) == null) {
                 objectLayer.setCell(player.getposition().getX(), player.getposition().getY(), null);
                 player.movedown();
+                moveEvil();
             } else {
                 return false;
             }
@@ -165,8 +169,8 @@ public class MapController extends TiledMap implements InputProcessor {
                     player.checkbag()) {
                 objectLayer.setCell(banana.getPosition().getX(), banana.getPosition().getY(), null);
                 player.pickup(banana);
+
             } else {
-                moveEvil();
                 return false;
             }
         }
