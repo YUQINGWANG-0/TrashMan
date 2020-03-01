@@ -28,7 +28,6 @@ public class MapController extends TiledMap implements InputProcessor {
     private Trash banana;
     private Bin bin;
     private Evil evil;
-    private Trash banana;
     private Trash paper;
     private Trash bottle;
     private Trash chemical;
