@@ -58,8 +58,8 @@ public class MapController extends TiledMap implements InputProcessor {
         //initialize trash
         this.paper = new Trash(new Position(8,7));
         this.banana = new Trash(new Position(10,6));
-        this.bottle = new Trash(new Position(55,16));
-        this.chemical = new Trash(new Position(12,26));
+        this.bottle = new Trash(new Position(10,16));
+        this.chemical = new Trash(new Position(10,26));
         trash_map.put(banana,bananas);
         trash_map.put(paper,papers);
         trash_map.put(bottle,bottles);
@@ -117,7 +117,7 @@ public class MapController extends TiledMap implements InputProcessor {
         }
 
         // add the bin
-        objectLayer.setCell(10,11,bins);
+        objectLayer.setCell(12,11, bins);
 
     }
 
