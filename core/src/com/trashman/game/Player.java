@@ -1,12 +1,11 @@
 package com.trashman.game;
 
-public class Player {
-    private Position position;
+public class Player extends Item {
     private Trash trash;
     // private boolean bag;
 
-    public Player(Position position){
-        this.position = position;
+    public Player(){
+        super(GameObject.HERO);
         trash = null;
     }
 
@@ -27,10 +26,6 @@ public class Player {
     public void putdown(){
         trash = null;
 
-    }
-
-    public Position getposition(){
-        return position;
     }
 
     public void moveleft(){

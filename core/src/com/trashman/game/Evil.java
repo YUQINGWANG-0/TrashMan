@@ -1,20 +1,9 @@
 package com.trashman.game;
 
-public class Evil {
-    private Position position;
+public class Evil extends Item {
 
-
-    public Evil(Position position) {
-        this.position = position;
-    }
-
-    public void setPosition(int xval, int yval){
-        position.setX(xval);
-        position.setY(yval);
-    }
-
-    public Position getPosition() {
-        return position;
+    public Evil() {
+        super(GameObject.EVIL_ROBOT);
     }
 
     public void move(){

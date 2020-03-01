@@ -1,10 +1,9 @@
 package com.trashman.game;
 
-public class Trash {
-    private Position position;
+public class Trash extends Item {
 
-    public Trash(Position position){
-        this.position = position;
+    public Trash(){
+        super(GameObject.BANANA);
     }
 
     public Position getPosition(){

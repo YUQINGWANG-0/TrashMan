@@ -1,6 +1,5 @@
 package com.trashman.game;
 
-import java.security.spec.ECField;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -15,7 +14,7 @@ public class Section {
 
     Set<Position> entrances;
     Map<Position, Boolean> walls;
-    Map<Position, GameObject> objects = new HashMap<>();
+    Map<Position, Item> objects = new HashMap<>();
 
     public Section(int xGrid, int yGrid, Set<Position> entrances) {
         this.xGrid = xGrid;
@@ -38,11 +37,11 @@ public class Section {
         this.walls = MapGenerator.generate(xGrid, yGrid, entrances);
     }
 
-    public Position placeObject(GameObject object) {
+    public Position placeObject(Item item) {
         while (true) {
             Position pos = new Position(random.nextInt(xGrid - 2) + 1, random.nextInt(yGrid - 2) + 1);
             if (!walls.getOrDefault(pos, false) && MapGenerator.isConnected(walls, pos)) {
-                objects.put(pos, object);
+                objects.put(pos, item);
                 return pos;
             }
         }
