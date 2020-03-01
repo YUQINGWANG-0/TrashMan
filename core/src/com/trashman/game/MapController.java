@@ -91,7 +91,12 @@ public class MapController extends TiledMap implements InputProcessor {
         //blue_bins.setTile(new StaticTiledMapTile(new TextureRegion(manager.get("sprites/bin_blue.png", Texture.class))));
 
         cells.put(HERO, players);
+        cells.put(PAPER, papers);
+        cells.put(BOTTLE, bottles);
+        cells.put(CHEMICAL_WASTE, chemicals);
         cells.put(BANANA, bananas);
+        cells.put(EVIL_ROBOT, evils);
+        cells.put(BIN_RED, bins);
 
         sectionPos = new Position(0, 0);
 
@@ -135,42 +140,6 @@ public class MapController extends TiledMap implements InputProcessor {
 //        trash_map.put(CHEMICAL_WASTE,chemicals);
 
         updateTiles();
-    }
-    private void createMap() {
-        MapLayers layers = getLayers();
-
-        baseLayer = new TiledMapTileLayer(xSize, ySize, 32, 32);
-        //create grid to place objects on
-        objectLayer = new TiledMapTileLayer(xSize, ySize, 32, 32);
-
-        //create and connect all entrances
-        Set<Position> entrances = new HashSet<>();
-        entrances.add(new Position(0, 2));
-        entrances.add(new Position(17, 0));
-        entrances.add(new Position(xGrid - 1, 11));
-        entrances.add(new Position(5, yGrid - 1));
-
-        //generate the walls
-        Map<Position, Boolean> walls = MapGenerator.generate(xGrid, yGrid, entrances);
-
-        //drawing the wallbushes onto the map
-        for (int row = 0; row < xGrid; row++) {
-            for (int col = 0; col < yGrid; col++) {
-                baseLayer.setCell(col, row, grass);
-                if (walls.getOrDefault(new Position(col, row), false)) {
-                    objectLayer.setCell(col, row, bush);
-                }
-            }
-        }
-
-        // add the player
-        objectLayer.setCell(player.getPosition().getX(), player.getPosition().getY(), players);
-
-        layers.add(baseLayer);
-        layers.add(objectLayer);
-        Gdx.input.setInputProcessor(this);
-
-
     }
 
     private void playerMoved() {
@@ -237,6 +206,7 @@ public class MapController extends TiledMap implements InputProcessor {
                 if (section.walls.getOrDefault(pos, false)) {
                     objectLayer.setCell(col, row, bush);
                 } else if (section.getObject(pos) != null) {
+                    GameObject type = section.getObject(pos).getType();
                     objectLayer.setCell(col, row, cells.get(section.getObject(pos).getType()));
                 } else {
                     objectLayer.setCell(col, row, null);
