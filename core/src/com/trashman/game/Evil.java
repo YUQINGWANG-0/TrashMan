@@ -2,15 +2,17 @@ package com.trashman.game;
 
 public class Evil extends Item {
 
+    private boolean dead = false;
+
     public Evil() {
         super(GameObject.EVIL_ROBOT);
     }
 
-    public void move(){
-
+    public void kill() {
+        dead = true;
     }
 
-    public void throwTrash(){
-
+    public boolean isDead() {
+        return dead;
     }
 }

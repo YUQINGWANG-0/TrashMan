@@ -29,7 +29,6 @@ public class MapController extends TiledMap implements InputProcessor {
 
     private Random random = new Random();
 
-
     private TiledMapTileLayer baseLayer;
     private TiledMapTileLayer objectLayer;
     private TiledMapTileLayer carryLayer;
@@ -38,6 +37,7 @@ public class MapController extends TiledMap implements InputProcessor {
     //adding all tilemap layer fields
     private TiledMapTileLayer.Cell grass = new TiledMapTileLayer.Cell();
     private TiledMapTileLayer.Cell bush = new TiledMapTileLayer.Cell();
+    private TiledMapTileLayer.Cell tree = new TiledMapTileLayer.Cell();
     private TiledMapTileLayer.Cell players = new TiledMapTileLayer.Cell();
     private TiledMapTileLayer.Cell bananas = new TiledMapTileLayer.Cell();
     private TiledMapTileLayer.Cell papers = new TiledMapTileLayer.Cell();
@@ -73,6 +73,7 @@ public class MapController extends TiledMap implements InputProcessor {
         //initialize the object sprites
         grass.setTile(new StaticTiledMapTile(new TextureRegion(manager.get("sprites/grass.png", Texture.class))));
         bush.setTile(new StaticTiledMapTile(new TextureRegion(manager.get("sprites/bush.png", Texture.class))));
+        tree.setTile(new StaticTiledMapTile(new TextureRegion(manager.get("sprites/tree.png", Texture.class))));
         players.setTile(new StaticTiledMapTile(new TextureRegion(manager.get("sprites/goodman_L.png", Texture.class))));
 
         //initialize all the trashes
@@ -185,6 +186,12 @@ public class MapController extends TiledMap implements InputProcessor {
             }
             section.placeObject(player, player.getPosition());
             evil = section.getRobot();
+
+            if (evil.isDead()) {
+                evils.setRotation(1);
+            } else {
+                evils.setRotation(0);
+            }
         }
     }
 
@@ -194,8 +201,12 @@ public class MapController extends TiledMap implements InputProcessor {
                 baseLayer.setCell(col, row, grass);
                 carryLayer.setCell(col, row, null);
                 Position pos = new Position(col, row);
-                if (section.walls.getOrDefault(pos, false)) {
-                    objectLayer.setCell(col, row, bush);
+                if (section.isWall(pos)) {
+                    if (section.isTree(pos)) {
+                        objectLayer.setCell(col, row, tree);
+                    } else {
+                        objectLayer.setCell(col, row, bush);
+                    }
                 } else if (section.getObject(pos) != null) {
                     objectLayer.setCell(col, row, cells.get(section.getObject(pos).getType()));
                 } else {
@@ -241,7 +252,6 @@ public class MapController extends TiledMap implements InputProcessor {
         );
 
         if (keycode == Input.Keys.SPACE) {
-
             for (Position pos : neighbours) {
                 Item item = section.getObject(pos);
                 if (item instanceof Trash && player.bagEmpty()) {
@@ -252,10 +262,19 @@ public class MapController extends TiledMap implements InputProcessor {
         }
 
         if (keycode == Input.Keys.ENTER) {
-
             for (Position pos : neighbours) {
                 if (section.getBin().position.equals(pos) && !player.bagEmpty()) {
                     player.putdown();
+                }
+            }
+        }
+
+        if (keycode == Input.Keys.K) {
+            for (Position pos : neighbours) {
+                if (section.getRobot().position.equals(pos)) {
+                    evil.kill();
+                    //section.removeObject(evil);
+                    evils.setRotation(1);
                 }
             }
         }
@@ -267,6 +286,10 @@ public class MapController extends TiledMap implements InputProcessor {
 
     //moving loop to move the evil figure
     public void moveEvil(){
+        if (evil.isDead()) {
+            return;
+        }
+
         //setting moving values to 0
         int dx = random.nextInt(3) - 1;
         int dy = random.nextInt(3) - 1;

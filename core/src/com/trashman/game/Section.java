@@ -1,9 +1,6 @@
 package com.trashman.game;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Section {
@@ -17,7 +14,8 @@ public class Section {
 
     private Set<Position> entrances;
     private Set<Position> connected;
-    Map<Position, Boolean> walls;
+    private Set<Position> trees = new HashSet<>();
+    private Map<Position, Boolean> walls;
     private Map<Position, Item> objects = new HashMap<>();
 
     public Section(int xGrid, int yGrid, Set<Position> entrances) {
@@ -38,8 +36,14 @@ public class Section {
             entrances.add(new Position(random.nextInt(xGrid - 2) + 1, 0));
         }
 
-        this.walls = MapGenerator.generate(xGrid, yGrid, entrances);
+        walls = MapGenerator.generate(xGrid, yGrid, entrances);
         connected = MapGenerator.connected(walls, xGrid, yGrid);
+
+        for (Position wall : walls.keySet()) {
+            if (random.nextInt(100) < 5) {
+                trees.add(wall);
+            }
+        }
 
         robot = new Evil();
         placeObject(robot);
@@ -114,5 +118,13 @@ public class Section {
 
     public Bin getBin() {
         return bin;
+    }
+
+    public boolean isTree(Position pos) {
+        return trees.contains(pos);
+    }
+
+    public boolean isWall(Position pos) {
+        return walls.getOrDefault(pos, false);
     }
 }
