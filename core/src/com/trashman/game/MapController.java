@@ -44,12 +44,18 @@ public class MapController extends TiledMap implements InputProcessor {
     private TiledMapTileLayer.Cell blue_bins = new TiledMapTileLayer.Cell();
     private TiledMapTileLayer.Cell green_bins = new TiledMapTileLayer.Cell();
 
+    //random trash dropping counter
+    private int counter;
+
     public MapController(int xGrid, int yGrid) {
         super();
         this.xGrid = xGrid;
         this.yGrid = yGrid;
         this.xSize = 32*xGrid;
         this.ySize = 32*yGrid;
+
+        //initialize the counter
+        counter = 0;
 
         //initialize player
         this.player = new Player(new Position(0,4));
@@ -202,10 +208,20 @@ public class MapController extends TiledMap implements InputProcessor {
         if (objectLayer.getCell(evil.getPosition().getX()+movexint, evil.getPosition().getY()+moveyint) == null) {
             //clear current evil position
             objectLayer.setCell(evil.getPosition().getX(), evil.getPosition().getY(), null);
+            //decide that after every 3rd movement the robot leaves a banana
+            droptrash();
             //set view layer evil position to new position
             objectLayer.setCell(evil.getPosition().getX()+movexint, evil.getPosition().getY()+moveyint, evils);
             //set object position to new position
             evil.setPosition(evil.getPosition().getX()+movexint, evil.getPosition().getY()+moveyint);
+        }
+    }
+
+    public void droptrash(){
+        counter++;
+        if (counter%3 == 0){
+            banana = new Trash(new Position(evil.getPosition().getX(),evil.getPosition().getY()));
+            objectLayer.setCell(evil.getPosition().getX(), evil.getPosition().getY(), bananas);
         }
     }
 
