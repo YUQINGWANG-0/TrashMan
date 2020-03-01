@@ -21,6 +21,15 @@ public abstract class Item {
         position = pos;
     }
 
+
+    public void setX(int x) {
+        position.setX(x);
+    }
+
+    public void setY(int y) {
+        position.setY(y);
+    }
+
     public Position getPosition() {
         return position;
     }

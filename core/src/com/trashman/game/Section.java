@@ -10,11 +10,13 @@ public class Section {
     private final int xGrid;
     private final int yGrid;
 
+    private Evil robot;
+
     private Random random = new Random();
 
     Set<Position> entrances;
     Map<Position, Boolean> walls;
-    Map<Position, Item> objects = new HashMap<>();
+    private Map<Position, Item> objects = new HashMap<>();
 
     public Section(int xGrid, int yGrid, Set<Position> entrances) {
         this.xGrid = xGrid;
@@ -35,16 +37,53 @@ public class Section {
         }
 
         this.walls = MapGenerator.generate(xGrid, yGrid, entrances);
+
+        robot = new Evil();
+        placeObject(robot);
     }
 
-    public Position placeObject(Item item) {
+
+    public boolean isEmpty(Position pos) {
+        return !(walls.getOrDefault(pos, false) || objects.getOrDefault(pos, null) != null);
+    }
+
+    public void placeObject(Item item) {
+        Position pos;
         while (true) {
-            Position pos = new Position(random.nextInt(xGrid - 2) + 1, random.nextInt(yGrid - 2) + 1);
+            pos = new Position(random.nextInt(xGrid - 2) + 1, random.nextInt(yGrid - 2) + 1);
             if (!walls.getOrDefault(pos, false) && MapGenerator.isConnected(walls, pos)) {
                 objects.put(pos, item);
-                return pos;
+                break;
             }
         }
+        item.setPosition(pos);
+    }
+
+    public void placeObject(Item item, Position pos) {
+        item.setPosition(pos);
+        objects.put(item.getPosition(), item);
+    }
+
+    public void moveObject(Item item, Position pos) {
+        assert objects.get(pos) == item;
+
+        objects.remove(item.getPosition());
+        item.setPosition(pos);
+        objects.put(item.getPosition(), item);
+    }
+
+    public void removeObject(Item item) {
+        assert objects.get(item.getPosition()) == item;
+
+        objects.remove(item.getPosition());
+    }
+
+    public void removeAt(Position pos) {
+        objects.remove(pos);
+    }
+
+    public Item getObject(Position pos) {
+        return objects.get(pos);
     }
 
     public Set<Position> getLeftEntrances() {
@@ -61,5 +100,9 @@ public class Section {
 
     public Set<Position> getBottomEntrances() {
         return entrances.stream().filter(pos -> pos.getY() == 0).collect(Collectors.toSet());
+    }
+
+    public Evil getRobot() {
+        return robot;
     }
 }

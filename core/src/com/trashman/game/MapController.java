@@ -12,11 +12,7 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 //import jdk.internal.util.xml.impl.Pair;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.trashman.game.GameObject.*;
@@ -35,6 +31,8 @@ public class MapController extends TiledMap implements InputProcessor {
     private Trash bottle;
     private Trash chemical;
     HashMap<Trash, TiledMapTileLayer.Cell> trash_map = new HashMap<>();
+
+    private Random random = new Random();
 
 
     private TiledMapTileLayer baseLayer;
@@ -57,6 +55,7 @@ public class MapController extends TiledMap implements InputProcessor {
     private TiledMapTileLayer.Cell green_bins = new TiledMapTileLayer.Cell();
 
     private Map<GameObject, TiledMapTileLayer.Cell> cells = new HashMap<>();
+    private List<Trash> trashList = new ArrayList<>();
 
     private Position sectionPos;
     private Section section;
@@ -118,27 +117,22 @@ public class MapController extends TiledMap implements InputProcessor {
 
         //initialize bin
         bin = new Bin();
-        bin.setPosition(section.placeObject(bin));
-        //initializing the evil
-        evil = new Evil();
-        evil.setPosition(section.placeObject(evil));
+        section.placeObject(bin);
+
+        evil = section.getRobot();
 
         //initialize player
         player = new Player();
-        player.setPosition(section.placeObject(player));
+        section.placeObject(player);
 
         banana = new Trash();
-        banana.setPosition(section.placeObject(banana));
+        section.placeObject(banana);
 
         //initialize trash
-//        this.paper = new Trash(new Position(8,7));
-//        this.banana = new Trash(new Position(10,6));
-//        this.bottle = new Trash(new Position(10,16));
-//        this.chemical = new Trash(new Position(10,26));
-//        trash_map.put(banana,bananas);
-//        trash_map.put(paper,papers);
-//        trash_map.put(bottle,bottles);
-//        trash_map.put(chemical,chemicals);
+//        trash_map.put(BANANA,bananas);
+//        trash_map.put(PAPER,papers);
+//        trash_map.put(BOTTLE,bottles);
+//        trash_map.put(CHEMICAL_WASTE,chemicals);
 
         updateTiles();
     }
@@ -181,33 +175,35 @@ public class MapController extends TiledMap implements InputProcessor {
 
     private void playerMoved() {
         Position pos = player.getPosition();
-        section.objects.put(pos, player);
+        section.moveObject(player, pos);
+
+        //Change the section
         if (pos.getX() == -1 || pos.getX() == xGrid || pos.getY() == -1 || pos.getY() == yGrid) {
-            section.objects.remove(pos);
+            section.removeAt(pos);
             objectLayer.setCell(pos.getX(), pos.getY(), null);
 
+            //Adjust the player position and section position
             if (pos.getX() == -1) {
-                objectLayer.setCell(xGrid - 1, pos.getY(), players);
-                player.getPosition().setX(xGrid - 1);
+                player.setX(xGrid - 1);
                 sectionPos = new Position(sectionPos.getX() - 1, sectionPos.getY());
             } else if (pos.getX() == xGrid) {
-                objectLayer.setCell(0, pos.getY(), players);
-                player.getPosition().setX(0);
+                player.setX(0);
                 sectionPos = new Position(sectionPos.getX() + 1, sectionPos.getY());
             } else if (pos.getY() == -1) {
-                objectLayer.setCell(pos.getX(), yGrid - 1, players);
-                player.getPosition().setY(yGrid - 1);
+                player.setY(yGrid - 1);
                 sectionPos = new Position(sectionPos.getX(), sectionPos.getY() - 1);
             } else if (pos.getY() == yGrid) {
-                objectLayer.setCell(pos.getX(), 0, players);
-                player.getPosition().setY(0);
+                player.setY(0);
                 sectionPos = new Position(sectionPos.getX(), sectionPos.getY() + 1);
             }
 
+            //reload section or create new section
             if (sections.containsKey(sectionPos)) {
                 section = sections.get(sectionPos);
             } else {
                 Set<Position> newEntrances = new HashSet<>();
+
+                //ensure that entrances all align
                 Position left = new Position(sectionPos.getX() - 1, sectionPos.getY());
                 Position right = new Position(sectionPos.getX() + 1, sectionPos.getY());
                 Position top = new Position(sectionPos.getX(), sectionPos.getY() + 1);
@@ -228,8 +224,8 @@ public class MapController extends TiledMap implements InputProcessor {
                 section = new Section(xGrid, yGrid, newEntrances);
                 sections.put(sectionPos, section);
             }
-            section.objects.put(player.getPosition(), player);
-            updateTiles();
+            section.placeObject(player, player.getPosition());
+            evil = section.getRobot();
         }
     }
 
@@ -240,8 +236,8 @@ public class MapController extends TiledMap implements InputProcessor {
                 Position pos = new Position(col, row);
                 if (section.walls.getOrDefault(pos, false)) {
                     objectLayer.setCell(col, row, bush);
-                } else if (section.objects.containsKey(pos)) {
-                    objectLayer.setCell(col, row, cells.get(section.objects.get(pos).getType()));
+                } else if (section.getObject(pos) != null) {
+                    objectLayer.setCell(col, row, cells.get(section.getObject(pos).getType()));
                 } else {
                     objectLayer.setCell(col, row, null);
                 }
@@ -251,66 +247,59 @@ public class MapController extends TiledMap implements InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
-        if (keycode == Input.Keys.DPAD_RIGHT) {
-            if (objectLayer.getCell(player.getPosition().getX() + 1, player.getPosition().getY()) == null) {
-                objectLayer.setCell(player.getPosition().getX(), player.getPosition().getY(), null);
-                section.objects.remove(player.getPosition());
-                player.moveright();
-                playerMoved();
-                moveEvil();
-            } else {
-                return false;
-            }
-        }
-        if (keycode == Input.Keys.DPAD_LEFT) {
-            if (objectLayer.getCell(player.getPosition().getX() - 1, player.getPosition().getY()) == null) {
-                objectLayer.setCell(player.getPosition().getX(), player.getPosition().getY(), null);
-                section.objects.remove(player.getPosition());
-                player.moveleft();
-                playerMoved();
-                moveEvil();
-            } else {
-                return false;
-            }
-        }
-        if (keycode == Input.Keys.DPAD_UP) {
-            if (objectLayer.getCell(player.getPosition().getX(), player.getPosition().getY() + 1) == null) {
-                objectLayer.setCell(player.getPosition().getX(), player.getPosition().getY(), null);
-                section.objects.remove(player.getPosition());
-                player.moveup();
-                playerMoved();
-                moveEvil();
-            } else {
-                return false;
-            }
-        }
-        if (keycode == Input.Keys.DPAD_DOWN) {
-            if (objectLayer.getCell(player.getPosition().getX(), player.getPosition().getY() - 1) == null) {
-                objectLayer.setCell(player.getPosition().getX(), player.getPosition().getY(), null);
-                section.objects.remove(player.getPosition());
-                player.movedown();
-                playerMoved();
-                moveEvil();
-            } else {
-                return false;
-            }
-        }
-        objectLayer.setCell(player.getPosition().getX(), player.getPosition().getY(), players);
+        if (keycode == Input.Keys.DPAD_RIGHT ||
+            keycode == Input.Keys.DPAD_LEFT ||
+            keycode == Input.Keys.DPAD_UP ||
+            keycode == Input.Keys.DPAD_DOWN) {
 
-        if (keycode == Input.Keys.SPACE) {
-            for(Map.Entry<Trash, TiledMapTileLayer.Cell> entry : trash_map.entrySet()){
-                if ((objectLayer.getCell(player.getPosition().getX(), player.getPosition().getY() - 1) == entry.getValue() ||
-                        objectLayer.getCell(player.getPosition().getX(), player.getPosition().getY() + 1) == entry.getValue() ||
-                        objectLayer.getCell(player.getPosition().getX() + 1, player.getPosition().getY()) == entry.getValue() ||
-                        objectLayer.getCell(player.getPosition().getX() - 1, player.getPosition().getY()) == entry.getValue()) &&
-                        player.checkbag()) {
-                    objectLayer.setCell(entry.getKey().getPosition().getX(), entry.getKey().getPosition().getY(), null);
-                    player.pickup(entry.getKey());
-                } else {
-                    return false;
+            Position newPos;
+            if (keycode == Input.Keys.DPAD_RIGHT) {
+                newPos = player.getPosition().add(1, 0);
+            } else if (keycode == Input.Keys.DPAD_LEFT) {
+                newPos = player.getPosition().add(-1, 0);
+            } else if (keycode == Input.Keys.DPAD_UP) {
+                newPos = player.getPosition().add(0, 1);
+            } else {
+                newPos = player.getPosition().add(0, -1);
+            }
+
+            if (section.isEmpty(newPos)) {
+                section.moveObject(player, newPos);
+                playerMoved();
+                moveEvil();
+            }
+
+            updateTiles();
+        }
+
+        while (keycode == Input.Keys.SPACE) {
+
+            //Iterator i = trashlist.iterator();
+            for (Trash trash : trashList){
+                //GameObject a = PAPER;
+               // System.out.println(trash);
+                if (objectLayer.getCell(player.getPosition().getX(), player.getPosition().getY() - 1) == cells.get(trash.getType()) &&
+                    player.emptybag()){
+                    objectLayer.setCell(player.getPosition().getX(), player.getPosition().getY() - 1, null);
+                    player.pickup(trash);
+                } else if (objectLayer.getCell(player.getPosition().getX(), player.getPosition().getY() + 1) == cells.get(trash.getType()) &&
+                    player.emptybag()) {
+                    objectLayer.setCell(player.getPosition().getX(), player.getPosition().getY() + 1, null);
+                    player.pickup(trash);
+                } else if (objectLayer.getCell(player.getPosition().getX() + 1, player.getPosition().getY()) == cells.get(trash.getType()) &&
+                    player.emptybag()) {
+                    objectLayer.setCell(player.getPosition().getX() + 1, player.getPosition().getY(), null);
+                    player.pickup(trash);
+                } else if (objectLayer.getCell(player.getPosition().getX() - 1, player.getPosition().getY()) == cells.get(trash.getType()) &&
+                    player.emptybag()) {
+                    objectLayer.setCell(player.getPosition().getX() - 1, player.getPosition().getY(), null);
+                    player.pickup(trash);
                 }
             }
+
+            return false;
         }
+
         if (keycode == Input.Keys.ENTER) {
             if ((objectLayer.getCell(player.getPosition().getX(), player.getPosition().getY() - 1) == bins ||
                     objectLayer.getCell(player.getPosition().getX(), player.getPosition().getY() + 1) == bins ||
@@ -323,45 +312,34 @@ public class MapController extends TiledMap implements InputProcessor {
                 return false;
             }
         }
+
         return false;
     }
+
     //moving loop to move the evil figure
     public void moveEvil(){
         //setting moving values to 0
-        int movexint = 0;
-        int moveyint = 0;
-        //array declaring possible moves
-        int[] positionarray = {1,-1, 0};
-        //generate random movement position
-        movexint = getRandom(positionarray);
-        moveyint = getRandom(positionarray);
+        int dx = random.nextInt(3) - 1;
+        int dy = random.nextInt(3) - 1;
+
+        Position newPos = new Position(dx, dy).add(evil.getPosition());
+
         //test if future evil position is free
-        if (objectLayer.getCell(evil.getPosition().getX()+movexint, evil.getPosition().getY()+moveyint) == null) {
-            //clear current evil position
-            objectLayer.setCell(evil.getPosition().getX(), evil.getPosition().getY(), null);
+        if (section.isEmpty(newPos)) {
             //decide that after every 3rd movement the robot leaves a banana
-            droptrash();
-            //set view layer evil position to new position
-            objectLayer.setCell(evil.getPosition().getX()+movexint, evil.getPosition().getY()+moveyint, evils);
-            //set object position to new position
-            evil.setPosition(evil.getPosition().getX()+movexint, evil.getPosition().getY()+moveyint);
+            dropTrash();
+            section.moveObject(evil, newPos);
         }
     }
 
-    public void droptrash(){
+    public void dropTrash(){
         counter++;
         if (counter%3 == 0){
             banana = new Trash();
-            banana.setPosition(evil.getPosition().getX(),evil.getPosition().getY());
-            objectLayer.setCell(evil.getPosition().getX(), evil.getPosition().getY(), bananas);
+            section.placeObject(banana, evil.getPosition());
         }
     }
 
-    //random number position in array generator
-    public static int getRandom(int[] array) {
-        int rnd = new Random().nextInt(array.length);
-        return array[rnd];
-    }
     @Override
     public boolean keyUp(int keycode) {
         return false;
