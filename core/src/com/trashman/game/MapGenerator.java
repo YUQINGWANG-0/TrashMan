@@ -43,7 +43,7 @@ public class MapGenerator {
         //randomly place walls
         for (int row = 1; row < yGrid - 1; row++) {
             for (int col = 1; col < xGrid - 1; col++) {
-                if (new Random().nextInt(100) < 60) {
+                if (new Random().nextInt(100) < 50) {
                     walls.put(new Position(col, row), true);
                 }
             }

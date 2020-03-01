@@ -50,6 +50,14 @@ public class Player {
         position.setY(position.getY()-1);
     }
 
+    public void setX(int x) {
+        position.setX(x);
+    }
+
+    public void setY(int y) {
+        position.setY(y);
+    }
+
     public boolean fullbag(){
         if (trash == null){
             return false;
