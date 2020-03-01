@@ -118,17 +118,16 @@ public class MapController extends TiledMap implements InputProcessor {
 
         //initialize bin
         bin = new Bin();
-        bin.setPosition(section.placeObject(bin));
-        //initializing the evil
-        evil = new Evil();
-        evil.setPosition(section.placeObject(evil));
+        section.placeObject(bin);
+
+        evil = section.getRobot();
 
         //initialize player
         player = new Player();
-        player.setPosition(section.placeObject(player));
+        section.placeObject(player);
 
         banana = new Trash();
-        banana.setPosition(section.placeObject(banana));
+        section.placeObject(banana);
 
         //initialize trash
 //        this.paper = new Trash(new Position(8,7));
@@ -182,6 +181,8 @@ public class MapController extends TiledMap implements InputProcessor {
     private void playerMoved() {
         Position pos = player.getPosition();
         section.objects.put(pos, player);
+
+        //Change the section
         if (pos.getX() == -1 || pos.getX() == xGrid || pos.getY() == -1 || pos.getY() == yGrid) {
             section.objects.remove(pos);
             objectLayer.setCell(pos.getX(), pos.getY(), null);
@@ -229,6 +230,7 @@ public class MapController extends TiledMap implements InputProcessor {
                 sections.put(sectionPos, section);
             }
             section.objects.put(player.getPosition(), player);
+            evil = section.getRobot();
             updateTiles();
         }
     }
