@@ -1,5 +1,6 @@
 # TrashMan
 This project is a group submission for [Hack the Burgh IV 2020](https://my.2020.hacktheburgh.com/).
+Please use the new-main brunch : )
 
 TrashMan is a procedurally generated game so the player can walk through a whole world!  :deciduous_tree:  :construction_worker: <br><br>
 During the game TrashMan has to pick up as many trash items as he can and put them into the correct bins. 
